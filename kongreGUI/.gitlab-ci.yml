@@ -1,0 +1,29 @@
+stages:
+  - build-docker
+
+build-docker:
+  stage: build-docker
+  tags:
+  - docker-build
+  image: docker
+  script:
+  - chmod +x ./scripts/*
+  - scripts/docker_builds.sh snapshot
+  - scripts/docker_pushes.sh snapshot
+  except:
+  - master
+
+build-docker-master:
+  stage: build-docker
+  tags:
+  - docker-build
+  image: docker
+  variables:
+    current_env: release
+  script:
+  - chmod +x ./scripts/*
+  - scripts/docker_builds.sh release
+  - scripts/docker_pushes.sh release
+  only:
+    refs:
+      - master

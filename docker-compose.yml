@@ -1,0 +1,26 @@
+version: '3.5'
+services:
+ inventory-ui:
+  image: kongregui:latest
+  container_name: "kongregui"
+  ports:
+   - 5002:5002
+ inventory-api:
+  image: kongrego:latest
+  container_name: "kongrego"
+  ports:
+   - 5001:5001
+ mongodb:
+  image: mongo:latest
+  container_name: "mongodb"
+  environment:
+   - MONGO_DATA_DIR=/usr/data/db
+   - MONGO_LOG_DIR=/dev/null
+  volumes:
+   - ./data/db:/usr/data/db
+  ports:
+   - 27017:27017
+  command: mongod --smallfiles --logpath=/dev/null # --quiet
+networks:
+ default:
+  name: kongrego-network

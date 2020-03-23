@@ -1,0 +1,142 @@
+<!-- instance.html-->
+
+{% extends "base.html" %}
+{% block title %}Inventory{% endblock %}
+{% block body %}
+<div style="width:100%;">
+
+    <form method="post" action="/inventory/kernel_patch">
+      <input type="submit"  name="submit" value="update patch" onclick="window.location.href='/inventory/kernel_patch'" class="btn btn-primary" style="width:13%;line-height: 2.1vh;margin-top: 10px;margin-bottom: 10px;height: 3.2vh;"></input>
+      <input  id="new_patch"  name="new_patch" class="element text medium" type="text" style="width:450px;"maxlength="255" value="{{json_patch}}"/>
+      </form>
+</div>
+<div style="height:3.5vh;width:100%;border:2px solid #ccc;font:16px/26px Georgia, Garamond, Serif; background: -webkit-gradient(linear, left top, left bottom, from(#eee), to(#e0e0e0)) ;">
+  <input type="text" id="myInput" onkeyup="SearchVM()" placeholder="  Search for microservices Names ..." style="padding-left:30px;width:100%; background: -webkit-gradient(linear, left top, left bottom, from(#eee), to(#e0e0e0)) ">
+</div>
+{%if mode==1 %}
+<div style="padding-left:0px;height:38.2vh;width:100%;border:2px solid #ccc;font:16px/26px Georgia, Garamond, Serif;overflow: auto;">
+  {%else %}
+  <div style="padding-left:0px;height:77.7vh;width:100%;border:2px solid #ccc;font:16px/26px Georgia, Garamond, Serif;overflow:auto;">
+    {%endif %}
+    <table style="width:100%;">
+    </table>
+    <table id="inventory-table" style="width:100%; border-bottom: 1px solid ;overflow: auto;">
+      <tr style=" background: -webkit-gradient(linear, left top, left bottom, from(#eee), to(#e0e0e0)) ; height:4.2vh">
+        <th style="padding-left:20px;">Name</th>
+        <th>VM Name</th>
+        <th>Type</th>
+        <th>Datacenter</th>
+        <th>environment</th>
+        <th>VM state</th>
+        <th>Image</th>
+        <th>Patched</th>
+         <th style="display: none;">Microservices</th>
+
+      </tr>
+      {%for i in range(number_of_servers) %}
+      {%if VMs[i] == machine_name  %}
+      <tr onclick="handleClick('{{VMs[i]}}')"  style=" border-bottom: 1px solid #ccc ;cursor: pointer; background:#c7e0ff;">
+        {%else  %}
+        <tr onclick="handleClick('{{VMs[i]}}')"  style=" border-bottom: 1px solid #ccc ;cursor: pointer;">
+          {% endif %}
+          <td style="padding-left:20px;"> {{VMs[i]}} </td>
+
+          <td> {{inv_names[i]}} </td>
+          <td> {{types[i]}} </td>
+          <td> {{dcs[i]}} </td>
+          <td> {{env[i]}} </td>
+          {%if states[i] ==1 %}
+          <td><img src="/static/green_led.png" > running </td>
+          {% endif %}
+          {%if states[i] ==0 %}
+          <td> <img src="/static/red_led.png" >stopped </td>
+          {% endif %}
+          {%if states[i] ==2 %}
+          <td> <img src="/static/orange_led.png" >unknown </td>
+          {% endif %}
+          <td> {{images[i]}} </td>
+          {%if patched[i] ==1 %}
+          <td><img src="/static/green_led.png" > Patched </td>
+          {% endif %}
+          {%if patched[i] ==0 %}
+          <td> <img src="/static/red_led.png" >outdated </td>
+          {% endif %}
+          {%if patched[i] ==2 %}
+          <td> <img src="/static/orange_led.png" >unknown </td>
+          {% endif %}
+          <td style="display: none;" > {{ms[i]}} </td>
+
+
+
+
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <div style="padding-right: 30px;height:3.6vh;width:100%;border:2px solid #ccc; text-align: right;font:16px/26px Georgia, Garamond, Serif; background: -webkit-gradient(linear, left top, left bottom, from(#eee), to(#e0e0e0)) ;">
+      <span style="line-height: 25px;font-size: 1.4vh;    font-weight: bold;">Total number of instances: {{number_of_servers}}  </span>
+    </div>
+
+    {%if mode==1 %}
+    <span style="line-height: 25px;font-size: 1.4vh;    font-weight: bold;">Instance: {{machine_name}}  </span>
+    <!-- <span style="line-height: 25px;font-size: 1.4vh;    font-weight: bold;">  |  Private IP: {{VM_IP}}</span> -->
+
+    <div  style="padding-left: 30px;height:37vh;width:100%;border:2px solid #ccc;font:16px/26px Georgia, Garamond, Serif;overflow:auto;  padding-bottom:20px ;">
+      <div class="row" style="width:100%;">
+        <h4 style="font-weight: bold;font-size: 14px;line-height: 2.1vh;">Description</h4>
+        <div class="column">
+
+
+          <table style="width:100%; ">
+            <tr> <td style="text-align: right;width: 200px;"> hostname : </td>      <td style="text-align: left;padding-left : 3%;"> {{machine_name}}   </td>           </tr>
+
+            <!-- <tr> <td style="text-align: right;width: 200px;"> Private IP :   </td>      <td style="text-align: left;padding-left : 3%;"> {{VM_IP}}        </td>           </tr> -->
+            <tr> <td style="text-align: right; float: left;width: 200px;"> environment :     </td>      <td style="text-align: left;padding-left : 3%;"> {{VM_env}}        </td>           </tr>
+            <tr> <td style="text-align: right; float: left;width: 200px;"> datacenter :     </td>      <td style="text-align: left;padding-left : 3%;"> {{VM_dc}}        </td>           </tr>
+            <tr> <td style="text-align: right; float: left;width: 200px;"> os_version :   </td>      <td style="text-align: left;padding-left : 3%;"> {{VM_image}}       </td>           </tr>
+            <tr> <td style="text-align: right; float: left;width: 200px;"> kernel_version :    </td>      <td style="text-align: left;padding-left : 3%;"> {{VM_kernel}}        </td>           </tr>
+            <!-- {%if VM_type !="microservice-machine" %} -->
+            <tr> <td style="text-align: right; float: left;width: 200px;"> Last inventory sent :    </td>  <td style="text-align: left;padding-left : 3%;"> {{VM_inv_last_run}}   </td>       </tr>
+            <tr> <td style="text-align: right; float: left;width: 200px;"> Microservices :    </td>      <td style="text-align: left;padding-left : 3%;"> <a >{{VM_microservices}}</a>    </td>           </tr>
+            <!-- {% endif %} -->
+
+          </table>
+        </div>
+
+        <div class="column">
+
+
+          <table style="width:100%; ">
+
+            <!-- {%if VM_Services !="" %}
+            <tr> <td style="text-align: right;width: 200px;"> services :    </td>      <td style="text-align: left; padding-left : 3%;"> {%for i in range(VM_Services|length) %} {{VM_Services[i]}}, {%if i % 5 == 4   %} <p style="margin: 0 0 1px;"></p> {%endif  %} {% endfor %}       </td>           </tr>
+            {% endif %} -->
+
+            {%if VM_cpu !=None %}
+            <tr> <td style="text-align: right;width: 200px;"> number of cores :    </td>      <td style="text-align: left; padding-left : 3%;"> {{VM_cpu}}        </td>           </tr>
+            {% endif %}
+
+            {%if VM_RAM != "info not available" %}
+            <tr> <td style="text-align: right; width: 200px;"> memory (RAM) :    </td>      <td style="text-align: left; padding-left : 3%;"> {{VM_RAM}}        </td>           </tr>
+            {% endif %}
+
+            <tr> <td style="text-align: right; float: left;width: 200px;"> Free disk space :    </td>  <td style="text-align: left;padding-left : 3%;"> {{VM_free_disk}} GB   </td>       </tr>
+            <tr> <td style="text-align: right; float: left;width: 200px;"> cpu load :    </td>  <td style="text-align: left;padding-left : 3%;"> {{VM_cpu_load_prcnt}}%  </td>       </tr>
+            <tr> <td style="text-align: right; float: left;width: 200px;"> Free RAM :    </td>  <td style="text-align: left;padding-left : 3%;"> {{VM_free_ram}} MB   </td>       </tr>
+
+          </table>
+
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+    </div>
+    {% endif %}
+
+    {% endblock %}
